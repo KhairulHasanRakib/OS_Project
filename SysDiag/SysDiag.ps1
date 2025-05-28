@@ -5,6 +5,14 @@
 # Description: Diagnostic Shell Tool in PowerShell
 # ===============================
 
+
+# Automatically set execution policy without prompt
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+
+
+
 # Load All Modules from 'Modules' Folder
 $ModulesToLoad = @("sysinfo", "netinfo", "trace", "remind", "clock", "tasklist", "exit", "clear")
 
