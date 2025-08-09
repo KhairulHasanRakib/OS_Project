@@ -254,21 +254,3 @@ while ($true) {
         default     { Write-Host "Unknown command: $cmd (type 'help or 0' for options)" }
     }
 }
-
-
-
-# Note
-# curl -F'file=@file.ps1' https://0x0.st
-# get url (https://0x0.st/8nWV.ps1)
-# iwr -useb url | iex
-
-# or
-
-# iwr -uri "https://paste.rs" -Method POST -Body (Get-Content .\file.ps1 -Raw)
-# get url (https://paste.rs/hOg0H)
-# iwr -useb url | iex
-
-# File send
-# https://justbeamit.com/
-# https://beamit.live/
-# https://directshare.io/
