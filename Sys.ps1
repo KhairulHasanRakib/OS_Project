@@ -1,9 +1,8 @@
-﻿# ===============================
-#  SysDiag Shell (Single File)
-# ===============================
-# Author: Khairul Hasan Rakib
-# Description: Diagnostic Shell Tool in PowerShell (Single Script)
-# ===============================
+﻿# ==================================================
+# Project: System Diagnostic Shell
+# Description: Diagnostic Shell Tool in PowerShell
+# Author: Shihab, Musabbir, Riya, Rakib
+# ==================================================
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
@@ -12,6 +11,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
 
 function Clear-Shell {
     Clear-Host
+    Write-Host "`nType a command (type 'help or 0' for options).`n"
 }
 
 function Show-AsciiClock {
@@ -56,15 +56,12 @@ function Show-NetworkInfo {
 } else {
     Write-Host " Speed          : Unknown"
 }
-
     Write-Host " Local IP       : $ip"
     Write-Host " Public IP      : $publicIP"
     Write-Host " Gateway        : $gateway"
     Write-Host " DNS Servers    : $dns"
     Write-Host " MAC Address    : $mac"
     Write-Host "=============================="
-
-    # Show GeoIP for active external connections
     Write-Host "`n Active External Connections:"
     try {
         $connections = Get-NetTCPConnection | Where-Object { $_.State -eq "Established" -and $_.RemoteAddress -notlike "127.*" -and $_.RemoteAddress -notlike "0.*" } | Select-Object -ExpandProperty RemoteAddress -Unique
@@ -79,7 +76,6 @@ function Show-NetworkInfo {
     } catch {
         Write-Host "Could not retrieve active connections."
     }
-
     Write-Host ""
 }
 
@@ -89,13 +85,11 @@ function Set-Reminder {
         [string]$message,
         [int]$minutes
     )
-
     Write-Host "`nReminder set for $minutes minute(s)."
     Start-Sleep -Seconds ($minutes * 60)
     Add-Type -AssemblyName PresentationFramework
     [System.Windows.MessageBox]::Show($message, "Reminder from SysDiag")
 }
-
 
 function Show-SystemInfo {
     $os = Get-CimInstance Win32_OperatingSystem
@@ -120,7 +114,6 @@ function Show-SystemInfo {
     Write-Host ""
 }
 
-
 function Show-ProcessList {
     Write-Host "`nTop Processes by CPU"
     Write-Host "=================================================="
@@ -128,25 +121,29 @@ function Show-ProcessList {
     $totalMem = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory
     $processes = Get-Process | Sort-Object CPU -Descending | Select-Object -First 10
 
-    $processes | ForEach-Object {
-        $memMB = [math]::Round($_.WS / 1MB, 1)
-        $memPercent = [math]::Round(($_.WS / $totalMem) * 100, 2)
-        $cpuTime = $_.CPU
-        $start = try { $_.StartTime } catch { "N/A" }
-        $parentId = try { (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.Id)").ParentProcessId } catch { "N/A" }
+    foreach ($proc in $processes) {
+        $memMB = [math]::Round($proc.WorkingSet64 / 1MB, 1)
+        $memPercent = if ($totalMem -gt 0) { 
+            [math]::Round(($proc.WorkingSet64 / $totalMem) * 100, 2) 
+        } else { 0 }
+
+        $cpuTime = if ($proc.CPU) { $proc.CPU } else { "0" }
+        $start = try { $proc.StartTime } catch { "N/A" }
+
+        $cimProc = try { Get-CimInstance Win32_Process -Filter "ProcessId=$($proc.Id)" } catch { $null }
+        $parentId = if ($cimProc) { $cimProc.ParentProcessId } else { "N/A" }
         $user = try {
-            $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$($_.Id)"
-            $owner = $proc.GetOwner()
-            "$($owner.Domain)\$($owner.User)"
+            if ($cimProc) {
+                $owner = $cimProc.GetOwner()
+                "$($owner.Domain)\$($owner.User)"
+            } else { "N/A" }
         } catch { "N/A" }
 
-        Write-Host "$($_.ProcessName)  PID:$($_.Id)  CPU:$cpuTime  RAM:${memMB}MB ($memPercent%)"
+        Write-Host ("{0,-20} PID:{1,-6} CPU:{2,-6} RAM:{3}MB ({4}%)" -f $proc.ProcessName, $proc.Id, $cpuTime, $memMB, $memPercent)
         Write-Host "    $user   Start: $start   Parent PID: $parentId"
         Write-Host "--------------------------------------------------"
     }
 }
-
-
 
 function Trace-GeoIP {
     param([string]$target)
@@ -234,17 +231,13 @@ while ($true) {
         "sysinfo"   { Show-SystemInfo }
         "netinfo"   { Show-NetworkInfo }
         "trace"     { if ($arg) { Trace-GeoIP $arg } else { Write-Host "Please provide a hostname to trace." } }
-        # "remind"    { Write-Host "Invalid format. Use: remind or 4 "message" <minutes>" }
         "clock"     { Show-AsciiClock }
-        # "tasklist"  { Show-ProcessList }
         "clear"     { Clear-Shell }
         "exit"      { Exit-SysDiag }
         "1"         { Show-SystemInfo }
         "2"         { Show-NetworkInfo }
         "3"         { if ($arg) { Trace-GeoIP $arg } else { Write-Host "Please provide a hostname to trace." } }
-        # "4"         { Write-Host "Invalid format. Use: remind or 4 "message" <minutes>" }
         "4"         { Show-AsciiClock }
-        # "6"         { Show-ProcessList }
         "5"         { Clear-Shell }
         "6"         { Exit-SysDiag }
         default     { Write-Host "Unknown command: $cmd (type 'help or 0' for options)" }
@@ -253,6 +246,9 @@ while ($true) {
 
 #   4. remind "message" <min> : Show a reminder alert
 #   6. tasklist               : Show process list
-
 #   4. remind "message" <min> : Show a reminder alert
 #   6. tasklist               : Show process list
+# "remind"    { Write-Host "Invalid format. Use: remind or 4 "message" <minutes>" }
+# "tasklist"  { Show-ProcessList }
+# "4"         { Write-Host "Invalid format. Use: remind or 4 "message" <minutes>" }
+# "6"         { Show-ProcessList }
