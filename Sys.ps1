@@ -210,11 +210,9 @@ while ($true) {
   1. sysinfo                : Show system resource info
   2. netinfo                : Show network info
   3. trace <host>           : Trace and GeoIP lookup
-  4. remind "message" <min> : Show a reminder alert
-  5. clock                  : Live ASCII clock
-  6. tasklist               : Show process list
-  7. clear                  : Clear the shell
-  8. exit                   : Exit shell
+  4. clock                  : Live ASCII clock
+  5. clear                  : Clear the shell
+  6. exit                   : Exit shell
   Example: (write:) sysinfo or 1
 "@
             Write-Host "============================================================"
@@ -226,11 +224,9 @@ while ($true) {
   1. sysinfo                : Show system resource info
   2. netinfo                : Show network info
   3. trace <host>           : Trace and GeoIP lookup
-  4. remind "message" <min> : Show a reminder alert
-  5. clock                  : Live ASCII clock
-  6. tasklist               : Show process list
-  7. clear                  : Clear the shell
-  8. exit                   : Exit shell
+  4. clock                  : Live ASCII clock
+  5. clear                  : Clear the shell
+  6. exit                   : Exit shell
   Example: (write:) sysinfo or 1
 "@
             Write-Host "============================================================"
@@ -238,19 +234,25 @@ while ($true) {
         "sysinfo"   { Show-SystemInfo }
         "netinfo"   { Show-NetworkInfo }
         "trace"     { if ($arg) { Trace-GeoIP $arg } else { Write-Host "Please provide a hostname to trace." } }
-        "remind"    { Write-Host "Invalid format. Use: remind or 4 "message" <minutes>" }
+        # "remind"    { Write-Host "Invalid format. Use: remind or 4 "message" <minutes>" }
         "clock"     { Show-AsciiClock }
-        "tasklist"  { Show-ProcessList }
+        # "tasklist"  { Show-ProcessList }
         "clear"     { Clear-Shell }
         "exit"      { Exit-SysDiag }
-        "1"   { Show-SystemInfo }
-        "2"   { Show-NetworkInfo }
-        "3"     { if ($arg) { Trace-GeoIP $arg } else { Write-Host "Please provide a hostname to trace." } }
-        "4"    { Write-Host "Invalid format. Use: remind or 4 "message" <minutes>" }
-        "5"     { Show-AsciiClock }
-        "6"  { Show-ProcessList }
-        "7"      { Clear-Shell }
-        "8"     { Exit-SysDiag }
+        "1"         { Show-SystemInfo }
+        "2"         { Show-NetworkInfo }
+        "3"         { if ($arg) { Trace-GeoIP $arg } else { Write-Host "Please provide a hostname to trace." } }
+        # "4"         { Write-Host "Invalid format. Use: remind or 4 "message" <minutes>" }
+        "4"         { Show-AsciiClock }
+        # "6"         { Show-ProcessList }
+        "5"         { Clear-Shell }
+        "6"         { Exit-SysDiag }
         default     { Write-Host "Unknown command: $cmd (type 'help or 0' for options)" }
     }
 }
+
+#   4. remind "message" <min> : Show a reminder alert
+#   6. tasklist               : Show process list
+
+#   4. remind "message" <min> : Show a reminder alert
+#   6. tasklist               : Show process list
