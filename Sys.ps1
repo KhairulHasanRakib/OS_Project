@@ -1,7 +1,7 @@
 ﻿# ==================================================
 # Project: System Diagnostic Shell
 # Description: Diagnostic Shell Tool in PowerShell
-# Author: Shihab, Musabbir, Riya, Rakib
+# Author: Shihab, Musabbir, Riya, shorif, Rakib
 # Run: irm "https://shorturl.fm/xuMo0" | iex
 # ==================================================
 
